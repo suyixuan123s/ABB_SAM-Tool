@@ -21,8 +21,8 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--onnx-model-path", type=str, default="E:/ABB/AI/SAM-Tool/sam_onnx.onnx")
-    parser.add_argument("--dataset-path", type=str, default="E:/ABB/AI/SAM-Tool/dataset")
-    # parser.add_argument("--dataset-path", type=str, default=r"E:\ABB\AI\Depth-Anything-V2\demo")
+    # parser.add_argument("--dataset-path", type=str, default="E:/ABB/AI/SAM-Tool/dataset")
+    parser.add_argument("--dataset-path", type=str, default=r"E:\ABB\AI\Depth-Anything-V2\demo")
     parser.add_argument("--categories", type=str, default="blood_tube, "
                                                           "5ML_centrifuge_tube, 10ML_centrifuge_tube, "
                                                           "5ML_sorting_tube_rack, 10ML_sorting_tube_rack, "
@@ -30,8 +30,7 @@ if __name__ == "__main__":
                                                           "refrigerator_open, refrigerator_close, "
                                                           "operating_desktop, "
                                                           "tobe_sorted_tube_rack,"
-                                                          "dispensing_tube_rack, "
-                                                          "sorting_tube_rack_base, "                                                        
+                                                          "5ML_dispensing_tube_rack, 10ML_dispensing_tube_rack"                                                                                                        
                                                           "tube_rack_storage_cabinet")
     args = parser.parse_args()
 

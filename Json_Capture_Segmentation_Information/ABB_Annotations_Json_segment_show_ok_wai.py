@@ -5,7 +5,6 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-
 # 类别ID到类别名称的映射关系（示例）
 class_mapping = {
     0: 'blood_tube',
@@ -28,8 +27,10 @@ class_mapping = {
 def generate_random_color():
     return (random.random(), random.random(), random.random())  # 生成RGB随机颜色
 
+
 # 为每个类别生成一个随机颜色
 category_colors = {category_id: generate_random_color() for category_id in class_mapping}
+
 
 def load_annotations(json_file):
     '''
@@ -55,14 +56,16 @@ def extract_largest_contour(segmentation):
     return segmentation
 
 
-def display_image_with_annotations(image_path, annotations, img_width, img_height):
+def display_image_with_annotations(image_path, annotations, img_width, img_height, output_dir):
     '''
     显示图片，并在图片上绘制分割信息，使用直接给出的像素坐标
     '''
     img = Image.open(image_path)
 
     # 使用 matplotlib 绘图
-    fig, ax = plt.subplots(1)
+    dpi = 100  # 设置 DPI（可根据需要调整）
+    figsize = (img_width / dpi, img_height / dpi)  # 将像素转换为英寸
+    fig, ax = plt.subplots(1, figsize=figsize, dpi=dpi)
     ax.imshow(img)
 
     # 绘制每个标注对象的分割信息
@@ -86,18 +89,30 @@ def display_image_with_annotations(image_path, annotations, img_width, img_heigh
         color = category_colors.get(class_id, (0, 0, 0))  # 如果未定义颜色，默认为黑色
 
         # 绘制多边形，使用类别对应的颜色
-        polygon = patches.Polygon(polygon_points, linewidth=2, edgecolor=color, facecolor='none')
+        polygon = patches.Polygon(polygon_points, linewidth=4, edgecolor=color, facecolor='none')
         ax.add_patch(polygon)
 
         # 在图上显示类别名称
         category_name = class_mapping.get(class_id, 'Unknown')
         first_point = polygon_points[0]
-        ax.text(first_point[0], first_point[1] - 5, category_name, color=color, fontsize=12, weight='bold')
+        ax.text(first_point[0], first_point[1] - 5, category_name, color=color, fontsize=16, weight='bold')
 
-    plt.show()
+    # 去掉坐标轴
+    ax.axis('off')
+
+    # 确保输出目录存在
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, os.path.basename(image_path))
+
+    # 保存图片
+    plt.savefig(output_path, dpi=dpi, bbox_inches='tight', pad_inches=0)
+    print(f"已保存标注图片: {output_path}")
+
+    # 关闭图形
+    plt.close(fig)
 
 
-def process_annotations(json_file, image_dir):
+def process_annotations(json_file, image_dir, output_dir):
     '''
     批量处理注释文件并可视化图片上的分割信息
     '''
@@ -124,12 +139,13 @@ def process_annotations(json_file, image_dir):
         print(f"显示图片: {img_info['file_name']}")
 
         # 显示图片并绘制标注
-        display_image_with_annotations(img_path, img_annotations, img_info['width'], img_info['height'])
+        display_image_with_annotations(img_path, img_annotations, img_info['width'], img_info['height'], output_dir)
 
 
 if __name__ == '__main__':
-    json_file = r'E:\ABB\AI\SAM-Tool\dataset\annotations.json'  # JSON文件路径
-    image_dir = r'E:\ABB\AI\SAM-Tool\dataset\images'  # 图片文件夹路径
+    json_file = r'../dataset/annotations.json'  # JSON文件路径
+    image_dir = r'../dataset/images'  # 图片文件夹路径
+    output_dir = r'../dataset/annotated_wai_images'  # 带标注图片的保存路径
 
     # 处理并可视化注释文件中的图片
-    process_annotations(json_file, image_dir)
+    process_annotations(json_file, image_dir, output_dir)
