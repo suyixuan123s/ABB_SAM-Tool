@@ -98,9 +98,9 @@ def convert(size, box):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--json_file', default=r'E:\ABB\AI\SAM-Tool\dataset\annotations.json',
+    parser.add_argument('--json_file', default=r'E:\ABB\AI\SAM-Tool\annotations.json',
                         type=str, help="COCO格式标注文件路径")
-    parser.add_argument('--save_dir', default=r'E:\ABB\AI\SAM-Tool\dataset\txt', type=str,
+    parser.add_argument('--save_dir', default=r'E:\ABB\AI\SAM-Tool\dataset\txt1', type=str,
                         help="保存YOLO格式txt标签的目录")
     args = parser.parse_args()
 

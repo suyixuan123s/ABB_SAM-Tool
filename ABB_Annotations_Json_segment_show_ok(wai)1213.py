@@ -19,7 +19,6 @@ class_mapping = {
     13: 'tube_rack_storage_cabinet'
 }
 
-
 def load_annotations(json_file):
     '''
     解析JSON文件，获取图片和标注信息
@@ -117,7 +116,7 @@ def process_annotations(json_file, image_dir, output_dir):
 
 
 if __name__ == '__main__':
-    json_file = r'E:\ABB\AI\SAM-Tool\dataset\annotations.json'  # JSON文件路径
+    json_file = r'E:\ABB\AI\SAM-Tool\annotations.json'  # JSON文件路径
     image_dir = r'E:\ABB\AI\SAM-Tool\dataset\images'  # 图片文件夹路径
     output_dir = r'E:\ABB\AI\SAM-Tool\dataset\labels'  # 输出txt文件夹路径
 

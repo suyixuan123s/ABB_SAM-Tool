@@ -143,9 +143,9 @@ def process_annotations(json_file, image_dir, output_dir):
 
 
 if __name__ == '__main__':
-    json_file = r'../dataset/annotations.json'  # JSON文件路径
+    json_file = r'E:\ABB\AI\SAM-Tool\annotations.json'  # JSON文件路径
     image_dir = r'../dataset/images'  # 图片文件夹路径
-    output_dir = r'../dataset/annotated_wai_images'  # 带标注图片的保存路径
+    output_dir = r'../dataset/annotated_wai_images3'  # 带标注图片的保存路径
 
     # 处理并可视化注释文件中的图片
     process_annotations(json_file, image_dir, output_dir)
