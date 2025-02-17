@@ -1,82 +1,77 @@
 import os
 import json
 from tqdm import tqdm
+import argparse
 
 
-def convert_polygon(size, polygon):
+def convert_polygon_to_yolo(size, segmentation):
     """
-    将多边形的点坐标归一化到[0, 1]之间
-    size: 图片的 (宽, 高)
-    polygon: 多边形的点 (x1, y1, x2, y2, ...)
-    返回值: 归一化后的多边形点列表
+    将COCO分割格式的多边形转换为YOLO格式。
+    size: (宽, 高)
+    segmentation: COCO的分割多边形列表
+    返回值: 归一化后的多边形点
     """
-    dw = 1. / size[0]
-    dh = 1. / size[1]
+    width, height = size
+    yolo_segmentation = []
 
-    normalized_polygon = []
-    for i in range(0, len(polygon), 2):
-        x = polygon[i] * dw
-        y = polygon[i + 1] * dh
-        normalized_polygon.extend([x, y])
+    for polygon in segmentation:
+        normalized_polygon = []
+        for i in range(0, len(polygon), 2):
+            x = polygon[i] / width
+            y = polygon[i + 1] / height
+            normalized_polygon.append((x, y))
+        yolo_segmentation.append(normalized_polygon)
 
-    return normalized_polygon
+    return yolo_segmentation
 
 
-def export_segmentation(annotation_file, save_dir, classes):
-    with open(annotation_file, 'r', encoding='utf-8') as f:
-        data = json.load(f)
+if __name__ == '__main__':
 
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--json_file', default=r'E:\ABB\AI\SAM-Tool\dataset\annotations.json',
+                        type=str, help="coco file path")
+    parser.add_argument('--save_dir', default=r'E:\ABB\AI\SAM-Tool\dataset\yolo_seg', type=str,
+                        help="where to save .txt labels with segmentation")
+    arg = parser.parse_args()
+
+    data = json.load(open(arg.json_file, 'r'))
+
+    # 如果存放txt文件夹不存在，则创建
+    if not os.path.exists(arg.save_dir):
+        os.makedirs(arg.save_dir)
+
+    id_map = {}
+
+    # 解析目标类别，也就是 categories 字段，并将类别写入文件 classes.txt 中
+    with open(os.path.join(arg.save_dir, 'classes.txt'), 'w') as f:
+        for i, category in enumerate(data['categories']):
+            f.write(f"{category['name']}\n")
+            id_map[category['id']] = i
 
     for img in tqdm(data['images']):
+        filename = img["file_name"].replace('\\', '/').split('/')[-1]
         img_width = img["width"]
         img_height = img["height"]
         img_id = img["id"]
-        filename = os.path.splitext(img["file_name"])[0] + ".txt"
-        txt_path = os.path.join(save_dir, filename)
+        head, tail = os.path.splitext(filename)
 
-        with open(txt_path, 'w') as f_txt:
-            for ann in data['annotations']:
-                if ann['image_id'] == img_id and 'segmentation' in ann:
-                    for polygon in ann['segmentation']:
-                        if isinstance(polygon, list) and len(polygon) >= 6:
-                            normalized_polygon = convert_polygon((img_width, img_height), polygon)
-                            normalized_polygon_str = ' '.join(map(str, normalized_polygon))
-                            f_txt.write(f"{ann['category_id']} {normalized_polygon_str}\n")
+        # txt文件名，与对应图片名只有后缀名不一样
+        txt_name = head + ".txt"
+        f_txt = open(os.path.join(arg.save_dir, txt_name), 'w')
 
+        for ann in data['annotations']:
+            if ann['image_id'] == img_id:
+                category_id = ann["category_id"]
+                segmentation = ann["segmentation"]
 
-# 使用方式
-annotation_file = r'E:\ABB\AI\SAM-Tool\dataset\annotations.json'
-save_dir = r'E:\ABB\AI\SAM-Tool\dataset\yolo_seg\labels'
-classes = {
-    0: "blood_tube",
-    1: "5ML_centrifuge_tube",
-    2: "10ML_centrifuge_tube",
-    3: "5ML_sorting_tube_rack",
-    4: "10ML_sorting_tube_rack",
-    5: "centrifuge_open",
-    6: "centrifuge_close",
-    7: "refrigerator_open",
-    8: "refrigerator_close",
-    9: "operating_desktop",
-    10: "tobe_sorted_tube_rack",
-    11: "dispensing_tube_rack",
-    12: "sorting_tube_rack_base",
-    13: "tube_rack_storage_cabinet"
-}  # 你的类别名称
+                # 转换 segmentation 信息
+                yolo_segmentation = convert_polygon_to_yolo((img_width, img_height), segmentation)
 
-export_segmentation(annotation_file, save_dir, classes)
+                # 写入txt，共2个字段：类别ID，多边形坐标
+                f_txt.write(f"{id_map[category_id]} ")
+                for polygon in yolo_segmentation:
+                    for point in polygon:
+                        f_txt.write(f"{point[0]} {point[1]} ")
+                f_txt.write("\n")
 
-classes = {
-    1: "5ML_sorting_tube_rack",
-    2: "10ML_sorting_tube_rack",
-    3: "centrifuge",
-    4: "refrigerator",
-    5: "5ML_tobe_sorted_tube_rack",
-    6: "10ML_tobe_sorted_tube_rack",
-    7: "5ml_dispensing_tube_rack",
-    8: "10ml_dispensing_tube_rack",
-    9: "rack_base",
-    10: "cabinet"
-}  # 你的类别名称
+        f_txt.close()
