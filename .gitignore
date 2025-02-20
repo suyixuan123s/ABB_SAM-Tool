@@ -132,3 +132,29 @@ dmypy.json
 .onnx
 
 
+            #移除 .gitignore 中的 dataset/ 规则：
+            #
+            #如果 .gitignore 文件中曾经包含了 dataset/ 规则，确保将其删除或注释掉，确保 Git 不再忽略 dataset 文件夹。
+            #将 dataset/ 文件夹添加到 Git： 使用 git add 将 dataset/ 文件夹添加到暂存区，以便提交：
+            #
+            #bash
+            #复制
+            #编辑
+
+            #git add dataset/
+
+            #提交更改： 将更改提交到本地仓库：
+            #
+            #bash
+            #复制
+            #编辑
+
+            #git commit -m "Add dataset folder to version control"
+
+            #推送到远程仓库： 如果你希望将这些更改推送到远程仓库，可以使用 git push：
+            #
+            #bash
+            #复制
+            #编辑
+
+            #git push origin master
